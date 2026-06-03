@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twelve — Paid Media Report 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --black: #080808;
+    --white: #FFFFFF;
+    --green: #2CF4A0;
+    --purple: #7B5CFF;
+    --surface: #111111;
+    --surface2: #1A1A1A;
+    --border: #222222;
+    --muted: #666666;
+    --text: #FFFFFF;
+    --google: #2CF4A0;
+    --linkedin: #7B5CFF;
+    --meta: #FF9D3A;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--black);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logos { display: flex; align-items: center; gap: 24px; }
+  .logo-divider { width: 1px; height: 28px; background: var(--border); }
+  .twelve-logo svg { height: 22px; width: auto; }
+  .unmuted-logo svg { height: 20px; width: auto; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--green);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .header-period { font-size: 13px; color: var(--muted); }
+
+  /* MONTH TABS */
+  .tabs-wrap {
+    background: var(--black);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+  }
+  .tabs { display: flex; gap: 0; }
+  .tab {
+    padding: 16px 24px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--white); }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+  /* CONTENT */
+  .content { padding: 40px 48px; max-width: 1440px; margin: 0 auto; }
+  .month-view { display: none; }
+  .month-view.active { display: block; }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 20px;
+  }
+  .section-gap { margin-top: 48px; }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 40px; }
+  .kpi-card {
+    background: var(--surface);
+    padding: 32px 28px;
+  }
+  .kpi-card .kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .kpi-card .kpi-value {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+    white-space: nowrap;
+  }
+  .kpi-card .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .kpi-card.accent .kpi-value { color: var(--green); }
+  .kpi-card.positive .kpi-value { color: var(--green); }
+  .kpi-card.negative .kpi-value { color: var(--meta); }
+
+  /* BUDGET BAR */
+  .budget-bar-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 40px;
+  }
+  .budget-bar-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+  .budget-bar-header h3 { font-size: 13px; font-weight: 700; letter-spacing: 0.3px; }
+  .budget-bar-header .budget-pct { font-size: 24px; font-weight: 800; letter-spacing: -1px; }
+  .budget-bar-outer { background: var(--surface2); border-radius: 3px; height: 6px; overflow: hidden; margin-bottom: 12px; }
+  .budget-bar-inner { height: 100%; border-radius: 3px; }
+  .budget-bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); letter-spacing: 0.3px; }
+
+  /* CHANNEL SPEND */
+  .channel-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .channel-row:last-child { border-bottom: none; }
+  .channel-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .channel-name { font-size: 12px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; width: 110px; color: var(--muted); }
+  .channel-bar-outer { flex: 1; background: var(--surface2); border-radius: 2px; height: 4px; overflow: hidden; }
+  .channel-bar-inner { height: 100%; border-radius: 2px; }
+  .channel-amount { font-size: 14px; font-weight: 800; width: 72px; text-align: right; letter-spacing: -0.5px; }
+  .channel-pct { font-size: 11px; color: var(--muted); width: 36px; text-align: right; }
+
+  /* GRIDS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; }
+  .grid-wrap { background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1px; }
+  .grid-wrap.mb { margin-bottom: 40px; }
+  .grid-2 [style*="grid-column:span 2"] { grid-column: span 2; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    padding: 28px 28px;
+  }
+  .card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .channel-pill {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+  .pill-google { background: rgba(44,244,160,0.12); color: var(--google); }
+  .pill-linkedin { background: rgba(123,92,255,0.15); color: var(--linkedin); }
+  .pill-meta { background: rgba(255,157,58,0.15); color: var(--meta); }
+  .pill-web { background: rgba(44,244,160,0.12); color: var(--green); }
+
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th {
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 0 0 12px 0;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table th:first-child { text-align: left; }
+  .data-table td { padding: 10px 0; text-align: right; border-bottom: 1px solid rgba(34,34,34,0.8); font-variant-numeric: tabular-nums; }
+  .data-table td:first-child { text-align: left; font-weight: 600; font-size: 13px; }
+  .data-table tr.total td { font-weight: 800; font-size: 13px; color: var(--white); border-bottom: none; border-top: 1px solid var(--border); }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* CHART */
+  .chart-wrap { position: relative; height: 220px; }
+  .chart-wrap.tall { height: 260px; }
+
+  /* METRIC PAIRS */
+  .metric-pair {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .metric-pair:last-child { border-bottom: none; }
+  .mp-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); }
+  .mp-value { font-size: 14px; font-weight: 800; letter-spacing: -0.3px; }
+  .mp-value.green { color: var(--green); }
+  .mp-value.warn { color: #FFB800; }
+
+  /* OVERVIEW HIGHLIGHT ROW */
+  .highlight-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  .hl-cell {
+    background: var(--surface);
+    padding: 32px 28px;
+    border-left: 3px solid transparent;
+  }
+  .hl-cell.google { border-left-color: var(--google); }
+  .hl-cell.linkedin { border-left-color: var(--linkedin); }
+  .hl-cell.meta { border-left-color: var(--meta); }
+  .hl-cell .hl-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .hl-cell .hl-value { font-size: 36px; font-weight: 800; letter-spacing: -2px; }
+  .hl-cell .hl-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 80px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .footer .dot { color: var(--green); margin: 0 8px; }
+
+  /* OVERVIEW CALLOUT */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 40px;
+  }
+  .callout strong { color: var(--white); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logos">
+    <!-- Twelve logo (white version) -->
+    <div class="twelve-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1366 768" height="22">
+        <path fill="#ffffff" d="M539.6,325.5l-47.4,106.9-8.3-106.9h-73.5l-53.1,106.5-1.9-106.5h-106.5l10.2-48.5h-70.1l-10.2,48.5h-35.6l-12.5,58.7h35.6l-11.7,54.6c-10.6,50.4,15.5,80,63.7,80s30.3-2.3,40.2-8.7l12.1-58.4c-11.4,4.2-21.2,5.7-28,5.7-14.4,0-19.7-8.3-16.3-24.6l10.2-48.5h50.5l8.6,130.8h84.9l51.2-103.8,7.6,103.8h84.1l92.9-189.5h-76.6Z"/>
+        <path fill="#ffffff" d="M706,454c-5.3,10.6-12.5,16.3-25.4,16.3s-22-6.4-23.5-28.8h116.7c4.2-12.9,6.4-25.4,6.4-37.5,0-45.9-30.7-82.2-85.3-82.2s-106.5,53.1-106.5,111.4,34.9,85.7,89.8,85.7,78.1-23.5,94.7-64.8h-67.1ZM692.7,373.3c13.6,0,19.3,8.7,19.3,21.6s0,4.2-.4,6.4h-50.4c5.3-16.7,15.5-28,31.5-28Z"/>
+        <polygon fill="#ffffff" points="823.6 249.7 767.2 515 837.3 515 893.8 249.7 823.6 249.7"/>
+        <polygon fill="#ffffff" points="1003.5 325.5 948.9 430.5 939.4 325.5 869.7 325.5 898.9 515 968.2 515 1077.7 325.5 1003.5 325.5"/>
+        <path fill="#ffffff" d="M1235.9,404c0-45.9-30.7-82.2-85.3-82.2s-106.5,53.1-106.5,111.4,34.9,85.7,89.8,85.7,78.1-23.5,94.7-64.8h-67.1c-5.3,10.6-12.5,16.3-25.4,16.3s-22-6.4-23.5-28.8h116.7c4.2-12.9,6.4-25.4,6.4-37.5ZM1167.3,401.3h-50.4c5.3-16.7,15.5-28,31.5-28s19.3,8.7,19.3,21.6,0,4.2-.4,6.4Z"/>
+      </svg>
+    </div>
+    <div class="logo-divider"></div>
+    <!-- Unmuted logo (already white) -->
+    <div class="unmuted-logo">
+      <svg width="328" height="65" viewBox="0 0 328 65" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:18px;width:auto;">
+        <path d="M64.4337 19.4766C59.8616 19.5379 56.3146 21.5093 54.1423 25.3877V19.9702H44.2529V53.169H54.1423V35.6065C54.5411 31.6668 56.8289 28.8951 60.4319 28.8951C63.7448 28.8951 65.8611 31.2957 65.8611 35.1741V53.1496H75.6944V32.2185C75.6944 24.452 71.2343 19.4766 64.4337 19.4766Z" fill="white"/>
+        <path d="M123.895 19.4766C118.809 19.5379 115.034 22.0579 113.033 26.9881C111.491 22.3095 107.759 19.4766 102.742 19.4766C98.2257 19.5379 94.682 21.5093 92.5657 25.4491V19.9638H82.7324V53.169H92.5657V36.7132C92.5657 32.2185 94.9095 28.9693 98.6839 28.8338C101.944 28.8338 103.958 31.2344 103.958 35.1741V53.1496H113.848V36.7132C113.848 32.2185 116.132 28.9693 119.85 28.8338C123.111 28.8338 125.168 31.2344 125.168 35.1741V53.1496H135.001V32.2185C134.988 24.452 130.643 19.4766 123.895 19.4766Z" fill="white"/>
+        <path d="M162.138 36.3458C162.138 40.8373 159.907 44.164 156.136 44.2253C152.991 44.2253 150.99 41.8247 150.99 37.8849V19.9707H141.101V40.9083C141.101 48.6522 145.445 53.5889 152.134 53.5889C156.594 53.5889 160.025 51.6175 162.138 47.6777V53.163H172.028V19.9707H162.138V36.3458Z" fill="white"/>
+        <path d="M218.106 19.6133C208.546 19.6133 202.042 26.3892 202.042 36.666C202.042 46.7621 208.332 53.5348 218.392 53.5348C224.052 53.5348 228.684 51.3827 231.829 47.6849L226.627 42.1997C224.567 44.4131 221.936 45.5844 219.249 45.5844C215.59 45.5844 212.963 43.3677 211.997 39.428H233.665C234.344 27.2959 228.971 19.6133 218.106 19.6133ZM211.819 33.7104C212.446 29.7094 214.786 26.999 218.221 26.999C221.765 26.999 224.155 29.6449 224.155 33.7104H211.819Z" fill="white"/>
+        <path d="M261.306 24.3405C259.134 21.2655 255.874 19.5393 251.812 19.5393C243.298 19.5393 237.638 26.2506 237.638 36.4081C237.638 46.6881 243.354 53.5834 252.043 53.5834C255.999 53.5834 259.131 51.8604 261.306 48.7822V53.1704H271.195V7.47168H261.306V24.3405ZM254.443 45.3361C250.329 45.3361 247.583 41.7643 247.52 36.6565C247.576 31.5455 250.322 28.035 254.443 28.035C258.564 28.035 261.306 31.5455 261.306 36.6565C261.306 41.7675 258.56 45.3361 254.443 45.3361V45.3361Z" fill="white"/>
+        <path d="M26.8725 35.0524C26.8725 40.9023 23.6157 44.4709 18.8128 44.4709C13.9439 44.458 10.4662 40.9088 10.4662 35.0524V13.2921L0.290039 18.2804V35.0589C0.290039 46.4489 7.49277 53.6507 18.7501 53.6507C29.958 53.6507 36.986 46.4489 36.986 35.0589V0.291992L26.866 5.25131L26.8725 35.0524Z" fill="white"/>
+        <path d="M194.04 45.103C192.21 45.1643 191.182 44.0576 191.182 41.4698V26.7758H198.381V19.7579H191.182V10.5781H184.898C184.922 10.8459 184.938 11.117 184.938 11.3945C184.94 13.4975 184.138 15.525 182.688 17.0777C181.239 18.6304 179.249 19.5958 177.109 19.7837L177.06 19.8224V26.7758H181.345V43.1154C181.345 50.0107 185.63 53.6439 191.564 53.6439C194.474 53.6531 197.329 52.864 199.805 51.3659L197.86 43.9769C196.383 44.6578 195.068 45.103 194.04 45.103Z" fill="white"/>
+        <path d="M305.94 13.1592L298.358 16.8537C301.563 22.4819 303.27 28.8088 303.322 35.2519C303.374 41.695 301.769 48.0474 298.655 53.7243L306.237 57.422C309.94 50.5983 311.851 42.9804 311.8 35.2539C311.748 27.5275 309.734 19.9348 305.94 13.1592Z" fill="white"/>
+        <path d="M291.872 20.0264L284.29 23.7305C286.313 27.2496 287.402 31.2084 287.46 35.2456C287.518 39.2829 286.541 43.27 284.62 46.8429L292.201 50.5438C294.708 45.8218 295.992 40.5693 295.939 35.2481C295.886 29.9268 294.499 24.6997 291.898 20.0264H291.872Z" fill="white"/>
+        <path d="M312.75 60.5911L320.331 64.2921C325.227 55.3641 327.764 45.3795 327.711 35.247C327.658 25.1145 325.017 15.1558 320.028 6.27734L312.446 9.97506C316.84 17.7068 319.171 26.398 319.224 35.2451C319.277 44.0921 317.05 52.8095 312.75 60.5911V60.5911Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="header-period">Jan – May 2026</span>
+    <span class="header-tag">Paid Media Report</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('overview')">Overview</div>
+    <div class="tab" onclick="switchTab('jan')">January</div>
+    <div class="tab" onclick="switchTab('feb')">February</div>
+    <div class="tab" onclick="switchTab('mar')">March</div>
+    <div class="tab" onclick="switchTab('apr')">April</div>
+    <div class="tab" onclick="switchTab('may')">May</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- =============================== OVERVIEW =============================== -->
+<div id="tab-overview" class="month-view active">
+
+  <div class="section-label">Year-to-date · 2026</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <div class="kpi-label">Total Spend YTD</div>
+      <div class="kpi-value">€31,326</div>
+      <div class="kpi-sub">vs €35,000 budgeted</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Google Ads</div>
+      <div class="kpi-value">€15,105</div>
+      <div class="kpi-sub">48% of total</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">LinkedIn</div>
+      <div class="kpi-value">€8,869</div>
+      <div class="kpi-sub">28% of total</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Meta</div>
+      <div class="kpi-value">€7,351</div>
+      <div class="kpi-sub">23% of total</div>
+    </div>
+    <div class="kpi-card negative">
+      <div class="kpi-label">Budget Variance</div>
+      <div class="kpi-value">-€3,674</div>
+      <div class="kpi-sub">Accumulated underspend</div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Monthly Spend vs Budget</h3>
+        <div class="chart-wrap tall"><canvas id="chart-spend-trend"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Channel Mix Over Time</h3>
+        <div class="chart-wrap tall"><canvas id="chart-channel-mix"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-3">
+      <div class="card">
+        <h3>Google Ads · CPC Trend <span class="channel-pill pill-google">Google</span></h3>
+        <div class="chart-wrap"><canvas id="chart-google-cpc"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>LinkedIn · CPM Trend <span class="channel-pill pill-linkedin">LinkedIn</span></h3>
+        <div class="chart-wrap"><canvas id="chart-li-cpm"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Website Sessions</h3>
+        <div class="chart-wrap"><canvas id="chart-sessions"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>LinkedIn · Impressions & Clicks <span class="channel-pill pill-linkedin">LinkedIn</span></h3>
+        <div class="chart-wrap tall"><canvas id="chart-li-impr-clicks"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Meta · Impressions & Link Clicks <span class="channel-pill pill-meta">Meta</span></h3>
+        <div class="chart-wrap tall"><canvas id="chart-meta-impr-clicks"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card" style="grid-column:span 2;">
+        <h3>Traffic Sources Composition</h3>
+        <div class="chart-wrap tall"><canvas id="chart-traffic-sources"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =============================== JANUARY =============================== -->
+<div id="tab-jan" class="month-view">
+  <div class="section-label">January 2026</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-value">€4,078</div>
+      <div class="kpi-sub">vs €7,000 budget</div>
+    </div>
+    <div class="kpi-card negative">
+      <div class="kpi-label">Variance</div>
+      <div class="kpi-value">-€2,922</div>
+      <div class="kpi-sub">58% utilisation</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Google Ads</div>
+      <div class="kpi-value">€2,984</div>
+      <div class="kpi-sub">73% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">LinkedIn</div>
+      <div class="kpi-value">€1,042</div>
+      <div class="kpi-sub">26% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Meta</div>
+      <div class="kpi-value">€51</div>
+      <div class="kpi-sub">1% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Sessions</div>
+      <div class="kpi-value">8,720</div>
+      <div class="kpi-sub">1,559 paid search</div>
+    </div>
+  </div>
+
+  <div class="budget-bar-wrap">
+    <div class="budget-bar-header">
+      <h3>Budget utilisation</h3>
+      <span class="budget-pct" style="color:#FF4D4D;">58%</span>
+    </div>
+    <div class="budget-bar-outer"><div class="budget-bar-inner" style="width:58%;background:rgba(255,157,58,0.6);"></div></div>
+    <div class="budget-bar-labels"><span>€0</span><span>€4,078 spent</span><span>€7,000 budget</span></div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Google Ads <span class="channel-pill pill-google">Google</span></h3>
+        <table class="data-table">
+          <thead><tr><th>Campaign</th><th>Spend</th><th>Clicks</th><th>CTR</th><th>CPC</th><th>Impr.</th></tr></thead>
+          <tbody>
+            <tr><td>U | Kassasystemen</td><td>€1,305</td><td>217</td><td>7.18%</td><td>€6.02</td><td>3,024</td></tr>
+            <tr><td>U | Branded</td><td>€1,159</td><td>2,098</td><td>36.82%</td><td>€0.55</td><td>5,698</td></tr>
+            <tr><td>U | Sectoren</td><td>€357</td><td>59</td><td>6.63%</td><td>€6.06</td><td>890</td></tr>
+            <tr><td>U | Bestelzuilen</td><td>€163</td><td>33</td><td>11.26%</td><td>€4.93</td><td>293</td></tr>
+            <tr class="total"><td>Total</td><td>€2,984</td><td>2,407</td><td>—</td><td>—</td><td>9,905</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Channel Split</h3>
+        <div class="chart-wrap"><canvas id="chart-jan-mix"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>LinkedIn <span class="channel-pill pill-linkedin">LinkedIn</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€1,042</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">22,846</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">2,209</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value">1.09%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value">€4.19</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value">€45.63</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Clicks</span><span class="mp-value">33</span></div>
+        <div class="metric-pair"><span class="mp-label">Audience Penetration</span><span class="mp-value warn">52.6%</span></div>
+        <div class="metric-pair"><span class="mp-label">Frequency</span><span class="mp-value">10×</span></div>
+      </div>
+      <div class="card">
+        <h3>Meta <span class="channel-pill pill-meta">Meta</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€51</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">9,447</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">9,202</span></div>
+        <div class="metric-pair"><span class="mp-label">Link Clicks</span><span class="mp-value">114</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Views</span><span class="mp-value">114</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value">1.21%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value">€5.42</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value green">€0.45</span></div>
+        <div class="metric-pair"><span class="mp-label">Sessions</span><span class="mp-value">17</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="section-label">Website · GA4</div>
+  <div class="grid-wrap">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Traffic Sources <span class="channel-pill pill-web">GA4</span></h3>
+        <div class="channel-row"><div class="channel-dot" style="background:#FF9D3A;"></div><div class="channel-name">Direct</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:41%;background:#FF9D3A;"></div></div><div class="channel-amount">3,578</div><div class="channel-pct">41%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#7B5CFF;"></div><div class="channel-name">Organic</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:30%;background:#7B5CFF;"></div></div><div class="channel-amount">2,591</div><div class="channel-pct">30%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--google);"></div><div class="channel-name">Paid Search</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:18%;background:var(--google);"></div></div><div class="channel-amount">1,559</div><div class="channel-pct">18%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#8B5CF6;"></div><div class="channel-name">Email</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:5%;background:#8B5CF6;"></div></div><div class="channel-amount">434</div><div class="channel-pct">5%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--linkedin);"></div><div class="channel-name">Paid Social</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:1%;background:var(--linkedin);"></div></div><div class="channel-amount">12</div><div class="channel-pct">&lt;1%</div></div>
+      </div>
+      <div class="card">
+        <h3>Session Stats</h3>
+        <div class="metric-pair"><span class="mp-label">Total Sessions</span><span class="mp-value">8,720</span></div>
+        <div class="metric-pair"><span class="mp-label">New Users</span><span class="mp-value">2,097</span></div>
+        <div class="metric-pair"><span class="mp-label">Returning Users</span><span class="mp-value">1,398</span></div>
+        <div class="metric-pair"><span class="mp-label">Avg. Engagement Time</span><span class="mp-value">119s</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================== FEBRUARY =============================== -->
+<div id="tab-feb" class="month-view">
+  <div class="section-label">February 2026</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-value">€4,694</div>
+      <div class="kpi-sub">vs €7,000 budget</div>
+    </div>
+    <div class="kpi-card negative">
+      <div class="kpi-label">Variance</div>
+      <div class="kpi-value">-€2,306</div>
+      <div class="kpi-sub">67% utilisation</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Google Ads</div>
+      <div class="kpi-value">€3,043</div>
+      <div class="kpi-sub">65% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">LinkedIn</div>
+      <div class="kpi-value">€1,092</div>
+      <div class="kpi-sub">23% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Meta</div>
+      <div class="kpi-value">€559</div>
+      <div class="kpi-sub">12% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Sessions</div>
+      <div class="kpi-value">9,274</div>
+      <div class="kpi-sub">+6% vs Jan</div>
+    </div>
+  </div>
+
+  <div class="budget-bar-wrap">
+    <div class="budget-bar-header"><h3>Budget utilisation</h3><span class="budget-pct" style="color:#FFB800;">67%</span></div>
+    <div class="budget-bar-outer"><div class="budget-bar-inner" style="width:67%;background:#FFB800;"></div></div>
+    <div class="budget-bar-labels"><span>€0</span><span>€4,694 spent</span><span>€7,000 budget</span></div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Google Ads <span class="channel-pill pill-google">Google</span></h3>
+        <table class="data-table">
+          <thead><tr><th>Campaign</th><th>Spend</th><th>Clicks</th><th>CTR</th><th>CPC</th><th>Impr.</th></tr></thead>
+          <tbody>
+            <tr><td>U | Kassasystemen</td><td>€1,429</td><td>204</td><td>5.99%</td><td>€7.00</td><td>3,408</td></tr>
+            <tr><td>U | Branded</td><td>€1,258</td><td>2,573</td><td>33.45%</td><td>€0.49</td><td>7,692</td></tr>
+            <tr><td>U | Sectoren</td><td>€357</td><td>54</td><td>7.57%</td><td>€6.61</td><td>713</td></tr>
+            <tr class="total"><td>Total</td><td>€3,043</td><td>2,831</td><td>—</td><td>—</td><td>11,813</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card"><h3>Channel Split</h3><div class="chart-wrap"><canvas id="chart-feb-mix"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>LinkedIn <span class="channel-pill pill-linkedin">LinkedIn</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€1,092</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">19,158</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">2,214</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value">0.93%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value">€6.13</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value">€57.00</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Clicks</span><span class="mp-value">24</span></div>
+        <div class="metric-pair"><span class="mp-label">Audience Penetration</span><span class="mp-value warn">51.5%</span></div>
+        <div class="metric-pair"><span class="mp-label">Frequency</span><span class="mp-value">8.65×</span></div>
+      </div>
+      <div class="card">
+        <h3>Meta <span class="channel-pill pill-meta">Meta</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€559</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">125,795</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">95,076</span></div>
+        <div class="metric-pair"><span class="mp-label">Link Clicks</span><span class="mp-value">3,859</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Views</span><span class="mp-value">1,902</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value">3.07%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value green">€4.44</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value green">€0.14</span></div>
+        <div class="metric-pair"><span class="mp-label">Sessions</span><span class="mp-value">97</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="section-label">Website · GA4</div>
+  <div class="grid-wrap">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Traffic Sources <span class="channel-pill pill-web">GA4</span></h3>
+        <div class="channel-row"><div class="channel-dot" style="background:#FF9D3A;"></div><div class="channel-name">Direct</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:42%;background:#FF9D3A;"></div></div><div class="channel-amount">3,889</div><div class="channel-pct">42%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#7B5CFF;"></div><div class="channel-name">Organic</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:23%;background:#7B5CFF;"></div></div><div class="channel-amount">2,157</div><div class="channel-pct">23%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--google);"></div><div class="channel-name">Paid Search</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:22%;background:var(--google);"></div></div><div class="channel-amount">2,081</div><div class="channel-pct">22%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#8B5CF6;"></div><div class="channel-name">Email</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:5%;background:#8B5CF6;"></div></div><div class="channel-amount">425</div><div class="channel-pct">5%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--linkedin);"></div><div class="channel-name">Paid Social</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:1%;background:var(--linkedin);"></div></div><div class="channel-amount">96</div><div class="channel-pct">1%</div></div>
+      </div>
+      <div class="card">
+        <h3>Session Stats</h3>
+        <div class="metric-pair"><span class="mp-label">Total Sessions</span><span class="mp-value">9,274</span></div>
+        <div class="metric-pair"><span class="mp-label">New Users</span><span class="mp-value">2,178</span></div>
+        <div class="metric-pair"><span class="mp-label">Returning Users</span><span class="mp-value">1,453</span></div>
+        <div class="metric-pair"><span class="mp-label">Avg. Engagement Time</span><span class="mp-value">80s</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================== MARCH =============================== -->
+<div id="tab-mar" class="month-view">
+  <div class="section-label">March 2026</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-value">€7,128</div>
+      <div class="kpi-sub">vs €7,000 budget</div>
+    </div>
+    <div class="kpi-card positive">
+      <div class="kpi-label">Variance</div>
+      <div class="kpi-value">+€128</div>
+      <div class="kpi-sub">First on-budget month</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Google Ads</div>
+      <div class="kpi-value">€3,102</div>
+      <div class="kpi-sub">43% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">LinkedIn</div>
+      <div class="kpi-value">€2,136</div>
+      <div class="kpi-sub">30% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Meta</div>
+      <div class="kpi-value">€1,890</div>
+      <div class="kpi-sub">27% of spend</div>
+    </div>
+    <div class="kpi-card positive">
+      <div class="kpi-label">Sessions</div>
+      <div class="kpi-value">12,142</div>
+      <div class="kpi-sub">+31% vs Feb</div>
+    </div>
+  </div>
+
+  <div class="budget-bar-wrap">
+    <div class="budget-bar-header"><h3>Budget utilisation</h3><span class="budget-pct" style="color:var(--green);">102%</span></div>
+    <div class="budget-bar-outer"><div class="budget-bar-inner" style="width:100%;background:var(--green);"></div></div>
+    <div class="budget-bar-labels"><span>€0</span><span>€7,128 spent ✓ On target</span><span>€7,000 budget</span></div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Google Ads <span class="channel-pill pill-google">Google</span></h3>
+        <table class="data-table">
+          <thead><tr><th>Campaign</th><th>Spend</th><th>Clicks</th><th>CTR</th><th>CPC</th><th>Impr.</th></tr></thead>
+          <tbody>
+            <tr><td>U | Kassasystemen</td><td>€1,429</td><td>237</td><td>7.36%</td><td>€6.03</td><td>3,220</td></tr>
+            <tr><td>U | Branded</td><td>€1,308</td><td>3,188</td><td>37.63%</td><td>€0.41</td><td>8,473</td></tr>
+            <tr><td>U | Sectoren</td><td>€365</td><td>63</td><td>9.31%</td><td>€5.80</td><td>677</td></tr>
+            <tr class="total"><td>Total</td><td>€3,102</td><td>3,488</td><td>—</td><td>—</td><td>12,370</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card"><h3>Channel Split</h3><div class="chart-wrap"><canvas id="chart-mar-mix"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>LinkedIn <span class="channel-pill pill-linkedin">LinkedIn</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€2,136</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">40,020</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">5,620</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value">0.86%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value">€6.21</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value">€53.37</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Clicks</span><span class="mp-value">69</span></div>
+        <div class="metric-pair"><span class="mp-label">Audience Penetration</span><span class="mp-value warn">62.7%</span></div>
+        <div class="metric-pair"><span class="mp-label">Frequency</span><span class="mp-value">7.61×</span></div>
+      </div>
+      <div class="card">
+        <h3>Meta <span class="channel-pill pill-meta">Meta</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€1,890</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">434,256</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">212,797</span></div>
+        <div class="metric-pair"><span class="mp-label">Link Clicks</span><span class="mp-value">25,461</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Views</span><span class="mp-value">7,159</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value green">5.86%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value green">€4.35</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value green">€0.07</span></div>
+        <div class="metric-pair"><span class="mp-label">Sessions</span><span class="mp-value">399</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="section-label">Website · GA4</div>
+  <div class="grid-wrap">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Traffic Sources <span class="channel-pill pill-web">GA4</span></h3>
+        <div class="channel-row"><div class="channel-dot" style="background:#FF9D3A;"></div><div class="channel-name">Direct</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:40%;background:#FF9D3A;"></div></div><div class="channel-amount">4,809</div><div class="channel-pct">40%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#7B5CFF;"></div><div class="channel-name">Organic</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:23%;background:#7B5CFF;"></div></div><div class="channel-amount">2,841</div><div class="channel-pct">23%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--google);"></div><div class="channel-name">Paid Search</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:25%;background:var(--google);"></div></div><div class="channel-amount">2,980</div><div class="channel-pct">25%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#8B5CF6;"></div><div class="channel-name">Email</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:3%;background:#8B5CF6;"></div></div><div class="channel-amount">420</div><div class="channel-pct">3%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--linkedin);"></div><div class="channel-name">Paid Social</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:3%;background:var(--linkedin);"></div></div><div class="channel-amount">421</div><div class="channel-pct">3%</div></div>
+      </div>
+      <div class="card">
+        <h3>Session Stats</h3>
+        <div class="metric-pair"><span class="mp-label">Total Sessions</span><span class="mp-value">12,142</span></div>
+        <div class="metric-pair"><span class="mp-label">New Users</span><span class="mp-value">2,792</span></div>
+        <div class="metric-pair"><span class="mp-label">Returning Users</span><span class="mp-value">1,774</span></div>
+        <div class="metric-pair"><span class="mp-label">Avg. Engagement Time</span><span class="mp-value">68s</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================== APRIL =============================== -->
+<div id="tab-apr" class="month-view">
+  <div class="section-label">April 2026</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-value">€7,919</div>
+      <div class="kpi-sub">vs €7,000 budget</div>
+    </div>
+    <div class="kpi-card positive">
+      <div class="kpi-label">Variance</div>
+      <div class="kpi-value">+€919</div>
+      <div class="kpi-sub">Highest spend month</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Google Ads</div>
+      <div class="kpi-value">€3,010</div>
+      <div class="kpi-sub">38% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">LinkedIn</div>
+      <div class="kpi-value">€2,465</div>
+      <div class="kpi-sub">31% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Meta</div>
+      <div class="kpi-value">€2,444</div>
+      <div class="kpi-sub">31% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Sessions</div>
+      <div class="kpi-value">12,121</div>
+      <div class="kpi-sub">2,396 paid search</div>
+    </div>
+  </div>
+
+  <div class="budget-bar-wrap">
+    <div class="budget-bar-header"><h3>Budget utilisation</h3><span class="budget-pct" style="color:var(--green);">113%</span></div>
+    <div class="budget-bar-outer"><div class="budget-bar-inner" style="width:100%;background:var(--green);"></div></div>
+    <div class="budget-bar-labels"><span>€0</span><span>€7,919 spent ✓ Above target</span><span>€7,000 budget</span></div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Google Ads <span class="channel-pill pill-google">Google</span></h3>
+        <table class="data-table">
+          <thead><tr><th>Campaign</th><th>Spend</th><th>Clicks</th><th>CTR</th><th>CPC</th><th>Impr.</th></tr></thead>
+          <tbody>
+            <tr><td>U | Kassasystemen</td><td>€1,429</td><td>178</td><td>6.46%</td><td>€8.03</td><td>2,754</td></tr>
+            <tr><td>U | Branded</td><td>€1,075</td><td>2,326</td><td>42.51%</td><td>€0.46</td><td>5,472</td></tr>
+            <tr><td>U | Sectoren</td><td>€507</td><td>79</td><td>9.81%</td><td>€6.42</td><td>805</td></tr>
+            <tr class="total"><td>Total</td><td>€3,010</td><td>2,583</td><td>—</td><td>—</td><td>9,031</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card"><h3>Channel Split</h3><div class="chart-wrap"><canvas id="chart-apr-mix"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>LinkedIn <span class="channel-pill pill-linkedin">LinkedIn</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€2,465</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">50,252</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">7,342</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value">0.87%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value">€5.64</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value">€49.05</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Clicks</span><span class="mp-value">102</span></div>
+        <div class="metric-pair"><span class="mp-label">Audience Penetration</span><span class="mp-value warn">55.2%</span></div>
+        <div class="metric-pair"><span class="mp-label">Frequency</span><span class="mp-value">7.0×</span></div>
+      </div>
+      <div class="card">
+        <h3>Meta <span class="channel-pill pill-meta">Meta</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€2,444</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">435,427</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">204,935</span></div>
+        <div class="metric-pair"><span class="mp-label">Link Clicks</span><span class="mp-value">23,283</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Views</span><span class="mp-value">8,620</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value green">5.35%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value">€5.61</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value green">€0.10</span></div>
+        <div class="metric-pair"><span class="mp-label">Sessions</span><span class="mp-value">565</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="section-label">Website · GA4</div>
+  <div class="grid-wrap">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Traffic Sources <span class="channel-pill pill-web">GA4</span></h3>
+        <div class="channel-row"><div class="channel-dot" style="background:#FF9D3A;"></div><div class="channel-name">Direct</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:38%;background:#FF9D3A;"></div></div><div class="channel-amount">4,622</div><div class="channel-pct">38%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#7B5CFF;"></div><div class="channel-name">Organic</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:25%;background:#7B5CFF;"></div></div><div class="channel-amount">3,019</div><div class="channel-pct">25%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--google);"></div><div class="channel-name">Paid Search</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:20%;background:var(--google);"></div></div><div class="channel-amount">2,396</div><div class="channel-pct">20%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#8B5CF6;"></div><div class="channel-name">Email</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:8%;background:#8B5CF6;"></div></div><div class="channel-amount">966</div><div class="channel-pct">8%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--linkedin);"></div><div class="channel-name">Paid Social</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:5%;background:var(--linkedin);"></div></div><div class="channel-amount">585</div><div class="channel-pct">5%</div></div>
+      </div>
+      <div class="card">
+        <h3>Session Stats</h3>
+        <div class="metric-pair"><span class="mp-label">Total Sessions</span><span class="mp-value">12,121</span></div>
+        <div class="metric-pair"><span class="mp-label">New Users</span><span class="mp-value">2,671</span></div>
+        <div class="metric-pair"><span class="mp-label">Returning Users</span><span class="mp-value">1,880</span></div>
+        <div class="metric-pair"><span class="mp-label">Avg. Engagement Time</span><span class="mp-value">59s</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================== MAY =============================== -->
+<div id="tab-may" class="month-view">
+  <div class="section-label">May 2026</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-value">€7,507</div>
+      <div class="kpi-sub">vs €7,000 budget</div>
+    </div>
+    <div class="kpi-card positive">
+      <div class="kpi-label">Variance</div>
+      <div class="kpi-value">+€507</div>
+      <div class="kpi-sub">107% utilisation</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Google Ads</div>
+      <div class="kpi-value">€2,966</div>
+      <div class="kpi-sub">40% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">LinkedIn</div>
+      <div class="kpi-value">€2,134</div>
+      <div class="kpi-sub">28% of spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Meta</div>
+      <div class="kpi-value">€2,407</div>
+      <div class="kpi-sub">32% of spend</div>
+    </div>
+    <div class="kpi-card positive">
+      <div class="kpi-label">Sessions</div>
+      <div class="kpi-value">12,622</div>
+      <div class="kpi-sub">+4% vs Apr</div>
+    </div>
+  </div>
+
+  <div class="budget-bar-wrap">
+    <div class="budget-bar-header"><h3>Budget utilisation</h3><span class="budget-pct" style="color:var(--green);">107%</span></div>
+    <div class="budget-bar-outer"><div class="budget-bar-inner" style="width:100%;background:var(--green);"></div></div>
+    <div class="budget-bar-labels"><span>€0</span><span>€7,507 spent ✓ On target</span><span>€7,000 budget</span></div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Google Ads <span class="channel-pill pill-google">Google</span></h3>
+        <table class="data-table">
+          <thead><tr><th>Campaign</th><th>Spend</th><th>Clicks</th><th>CTR</th><th>CPC</th><th>Impr.</th></tr></thead>
+          <tbody>
+            <tr><td>U | Kassasystemen</td><td>€1,429</td><td>176</td><td>6.89%</td><td>€8.12</td><td>2,554</td></tr>
+            <tr><td>U | Sectoren</td><td>€818</td><td>102</td><td>10.46%</td><td>€8.02</td><td>975</td></tr>
+            <tr><td>U | Branded</td><td>€564</td><td>3,138</td><td>38.20%</td><td>€0.18</td><td>8,214</td></tr>
+            <tr><td>Display Retargeting</td><td>€152</td><td>102</td><td>0.29%</td><td>€1.49</td><td>35,675</td></tr>
+            <tr><td>U | Competitors</td><td>€4</td><td>1</td><td>11.11%</td><td>€3.51</td><td>9</td></tr>
+            <tr class="total"><td>Total</td><td>€2,966</td><td>3,519</td><td>—</td><td>—</td><td>47,427</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card"><h3>Channel Split</h3><div class="chart-wrap"><canvas id="chart-may-mix"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card">
+        <h3>LinkedIn <span class="channel-pill pill-linkedin">LinkedIn</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€2,134</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">46,534</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">5,588</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value">0.93%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value green">€4.95</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value green">€45.86</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Clicks</span><span class="mp-value">87</span></div>
+        <div class="metric-pair"><span class="mp-label">Audience Penetration</span><span class="mp-value warn">65.7%</span></div>
+        <div class="metric-pair"><span class="mp-label">Frequency</span><span class="mp-value">8.33×</span></div>
+      </div>
+      <div class="card">
+        <h3>Meta <span class="channel-pill pill-meta">Meta</span></h3>
+        <div class="metric-pair"><span class="mp-label">Spend</span><span class="mp-value">€2,407</span></div>
+        <div class="metric-pair"><span class="mp-label">Impressions</span><span class="mp-value">313,973</span></div>
+        <div class="metric-pair"><span class="mp-label">Reach</span><span class="mp-value">134,101</span></div>
+        <div class="metric-pair"><span class="mp-label">Link Clicks</span><span class="mp-value">15,840</span></div>
+        <div class="metric-pair"><span class="mp-label">LP Views</span><span class="mp-value">9,382</span></div>
+        <div class="metric-pair"><span class="mp-label">CTR</span><span class="mp-value green">5.05%</span></div>
+        <div class="metric-pair"><span class="mp-label">CPM</span><span class="mp-value">€7.67</span></div>
+        <div class="metric-pair"><span class="mp-label">CPC</span><span class="mp-value green">€0.15</span></div>
+        <div class="metric-pair"><span class="mp-label">Sessions</span><span class="mp-value">1,261</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="section-label">Website · GA4</div>
+  <div class="grid-wrap">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Traffic Sources <span class="channel-pill pill-web">GA4</span></h3>
+        <div class="channel-row"><div class="channel-dot" style="background:#FF9D3A;"></div><div class="channel-name">Direct</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:37%;background:#FF9D3A;"></div></div><div class="channel-amount">4,705</div><div class="channel-pct">37%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#7B5CFF;"></div><div class="channel-name">Organic</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:17%;background:#7B5CFF;"></div></div><div class="channel-amount">2,158</div><div class="channel-pct">17%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--google);"></div><div class="channel-name">Paid Search</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:25%;background:var(--google);"></div></div><div class="channel-amount">3,095</div><div class="channel-pct">25%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:#8B5CF6;"></div><div class="channel-name">Email</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:7%;background:#8B5CF6;"></div></div><div class="channel-amount">930</div><div class="channel-pct">7%</div></div>
+        <div class="channel-row"><div class="channel-dot" style="background:var(--linkedin);"></div><div class="channel-name">Paid Social</div><div class="channel-bar-outer"><div class="channel-bar-inner" style="width:10%;background:var(--linkedin);"></div></div><div class="channel-amount">1,263</div><div class="channel-pct">10%</div></div>
+      </div>
+      <div class="card">
+        <h3>Session Stats</h3>
+        <div class="metric-pair"><span class="mp-label">Total Sessions</span><span class="mp-value">12,622</span></div>
+        <div class="metric-pair"><span class="mp-label">New Users</span><span class="mp-value">3,443</span></div>
+        <div class="metric-pair"><span class="mp-label">Returning Users</span><span class="mp-value">1,772</span></div>
+        <div class="metric-pair"><span class="mp-label">Avg. Engagement Time</span><span class="mp-value">61s</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .content -->
+
+<div class="footer">
+  <div>Twelve.eu</div>
+  <div>Prepared by Unmuted<span class="dot">·</span>unmuted.com</div>
+  <div><a href="https://docs.google.com/spreadsheets/d/1RgpIAflQXJtxzuqnRKoARCVuV5up6pcA60DTEKP-ldE/edit?gid=1765718807#gid=1765718807" target="_blank" style="color:var(--green);text-decoration:none;font-weight:700;letter-spacing:0.5px;">&#8599; Open KPI Tracker</a></div>
+</div>
+
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','May'];
+
+// Colors
+const C = { green:'#2CF4A0', purple:'#7B5CFF', amber:'#FF9D3A', white:'#FFFFFF' };
+const G = { grid:'rgba(34,34,34,0.8)', tick:'#555555' };
+
+// Tab switching
+function switchTab(id) {
+  document.querySelectorAll('.month-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  const map = {overview:0,jan:1,feb:2,mar:3,apr:4,may:5};
+  document.querySelectorAll('.tab')[map[id]].classList.add('active');
+}
+
+Chart.defaults.color = G.tick;
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif";
+
+// Square legend labels
+const squareLegend = {
+  color: G.tick,
+  font: { size: 11, weight: '600' },
+  padding: 16,
+  usePointStyle: true,
+  pointStyle: 'rect',
+  pointStyleWidth: 10
+};
+
+const scaleBase = {
+  x: { ticks: { color: G.tick, font:{size:11} }, grid: { color: G.grid }, border: { color: G.grid } },
+  y: { ticks: { color: G.tick, font:{size:11} }, grid: { color: G.grid }, border: { color: G.grid } }
+};
+
+// Smooth clip-reveal: a clipping rect expands left→right over the fully-rendered chart
+const lineDrawPlugin = {
+  id: 'lineDrawPlugin',
+  beforeDatasetsDraw(chart) {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    const p = chart._drawProgress ?? 1;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(chartArea.left - 4, chartArea.top - 12, (chartArea.width + 8) * p, chartArea.height + 24);
+    ctx.clip();
+  },
+  afterDatasetsDraw(chart) {
+    chart.ctx.restore();
+  }
+};
+Chart.register(lineDrawPlugin);
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function animateDraw(chart, duration = 1100) {
+  chart._drawProgress = 0;
+  const start = performance.now();
+  function tick(now) {
+    const raw = Math.min((now - start) / duration, 1);
+    chart._drawProgress = easeInOutCubic(raw);
+    chart.draw();
+    if (raw < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// Bar animation: smooth grow from bottom, no stagger jank
+const barAnim = { animation: { duration: 900, easing: 'easeOutQuart' } };
+
+// Chart registry — init lazily when visible
+const chartDefs = {};
+const chartInst = {};
+
+function registerChart(id, factory) { chartDefs[id] = factory; }
+
+function initChart(id) {
+  if (chartInst[id]) return;
+  const el = document.getElementById(id);
+  if (!el || !chartDefs[id]) return;
+  const chart = chartDefs[id](el);
+  chartInst[id] = chart;
+  // Trigger smooth clip-reveal for line/doughnut charts
+  if (chart.config.type === 'line') animateDraw(chart);
+  if (chart.config.type === 'doughnut') { /* built-in is fine */ }
+}
+
+// IntersectionObserver triggers chart init when canvas enters viewport
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { initChart(e.target.id); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('canvas').forEach(c => observer.observe(c));
+
+// ── OVERVIEW CHARTS ───────────────────────────────────────────────────────────
+
+registerChart('chart-spend-trend', (el) => new Chart(el, {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Actual Spend (€)', data: [4078,4694,7128,7919,7507], backgroundColor: C.green, borderRadius: 4, borderSkipped: false },
+      { label: 'Budget (€)', data: [7000,7000,7000,7000,7000], type:'line', borderColor: C.amber, borderWidth: 2, borderDash: [5,4], pointBackgroundColor: C.amber, pointStyle:'rect', fill:false, tension:0 }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, ...barAnim,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: scaleBase
+  }
+}));
+
+registerChart('chart-channel-mix', (el) => new Chart(el, {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Google', data: [2984,3043,3102,3010,2966], backgroundColor: C.green, borderRadius: 2 },
+      { label: 'LinkedIn', data: [1042,1092,2136,2465,2134], backgroundColor: C.purple, borderRadius: 2 },
+      { label: 'Meta', data: [51,559,1890,2444,2407], backgroundColor: C.amber, borderRadius: 2 }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, ...barAnim,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: { x: { ...scaleBase.x, stacked:true }, y: { ...scaleBase.y, stacked:true } }
+  }
+}));
+
+registerChart('chart-google-cpc', (el) => new Chart(el, {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Kassasystemen', data: [6.02,7.00,6.03,8.03,8.12], borderColor: C.green, tension:0.4, fill:false, pointBackgroundColor:C.green, pointStyle:'rect', pointRadius:5 },
+      { label: 'Sectoren', data: [6.06,6.61,5.80,6.42,8.02], borderColor:'rgba(44,244,160,0.45)', borderDash:[4,3], tension:0.4, fill:false, pointBackgroundColor:'rgba(44,244,160,0.45)', pointStyle:'rect', pointRadius:5 }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, animation: false,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: scaleBase
+  }
+}));
+
+registerChart('chart-li-cpm', (el) => new Chart(el, {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [{ label: 'CPM (€)', data: [45.63,57.00,53.37,49.05,45.86], borderColor:C.purple, tension:0.4, fill:true, backgroundColor:'rgba(123,92,255,0.08)', pointBackgroundColor:C.purple, pointStyle:'rect', pointRadius:5 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, animation: false,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: scaleBase
+  }
+}));
+
+registerChart('chart-sessions', (el) => new Chart(el, {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [{ label: 'Sessions', data: [8720,9274,12142,12121,12622], borderColor:C.green, tension:0.4, fill:true, backgroundColor:'rgba(44,244,160,0.06)', pointBackgroundColor:C.green, pointStyle:'rect', pointRadius:5 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, animation: false,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: scaleBase
+  }
+}));
+
+// LinkedIn impressions + LP clicks
+registerChart('chart-li-impr-clicks', (el) => new Chart(el, {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Impressions', data: [22846,19158,40020,50252,46534], borderColor:C.purple, tension:0.4, fill:true, backgroundColor:'rgba(123,92,255,0.07)', pointBackgroundColor:C.purple, pointStyle:'rect', pointRadius:5, yAxisID:'y' },
+      { label: 'LP Clicks', data: [33,24,69,102,87], borderColor:'rgba(123,92,255,0.45)', borderDash:[4,3], tension:0.4, fill:false, pointBackgroundColor:'rgba(123,92,255,0.45)', pointStyle:'rect', pointRadius:5, yAxisID:'y1' }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, animation: false,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: {
+      x: scaleBase.x,
+      y: { ...scaleBase.y, position:'left', title:{ display:true, text:'Impressions', color:G.tick, font:{size:10} } },
+      y1: { ...scaleBase.y, position:'right', grid:{ drawOnChartArea:false }, title:{ display:true, text:'LP Clicks', color:G.tick, font:{size:10} } }
+    }
+  }
+}));
+
+// Meta impressions + link clicks
+registerChart('chart-meta-impr-clicks', (el) => new Chart(el, {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Impressions', data: [9447,125795,434256,435427,313973], borderColor:C.amber, tension:0.4, fill:true, backgroundColor:'rgba(255,157,58,0.07)', pointBackgroundColor:C.amber, pointStyle:'rect', pointRadius:5, yAxisID:'y' },
+      { label: 'LP Views', data: [114,1902,7159,8620,9382], borderColor:'rgba(255,157,58,0.5)', borderDash:[4,3], tension:0.4, fill:false, pointBackgroundColor:'rgba(255,157,58,0.5)', pointStyle:'rect', pointRadius:5, yAxisID:'y1' }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, animation: false,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: {
+      x: scaleBase.x,
+      y: { ...scaleBase.y, position:'left', title:{ display:true, text:'Impressions', color:G.tick, font:{size:10} } },
+      y1: { ...scaleBase.y, position:'right', grid:{ drawOnChartArea:false }, title:{ display:true, text:'LP Views', color:G.tick, font:{size:10} } }
+    }
+  }
+}));
+
+// Traffic sources composition (stacked bar)
+registerChart('chart-traffic-sources', (el) => new Chart(el, {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Direct',      data: [3578,3889,4809,4622,4705], backgroundColor:'rgba(255,255,255,0.18)', borderRadius:2 },
+      { label: 'Organic',     data: [2591,2157,2841,3019,2158], backgroundColor: C.purple, borderRadius:2 },
+      { label: 'Paid Search', data: [1559,2081,2980,2396,3095], backgroundColor: C.green,  borderRadius:2 },
+      { label: 'Email',       data: [434,425,420,966,930],       backgroundColor: C.amber,  borderRadius:2 },
+      { label: 'Paid Social', data: [12,96,421,585,1263],        backgroundColor:'rgba(123,92,255,0.4)', borderRadius:2 }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, ...barAnim,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: { x: { ...scaleBase.x, stacked:true }, y: { ...scaleBase.y, stacked:true } }
+  }
+}));
+
+// ── MONTHLY DONUT CHARTS ──────────────────────────────────────────────────────
+
+function donut(id, g, li, m) {
+  registerChart(id, (el) => new Chart(el, {
+    type: 'doughnut',
+    data: {
+      labels: ['Google Ads','LinkedIn','Meta'],
+      datasets: [{ data: [g,li,m], backgroundColor: [C.green, C.purple, C.amber], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '68%',
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: { legend: { position:'bottom', labels: { ...squareLegend, padding:14 } } }
+    }
+  }));
+}
+donut('chart-jan-mix', 2984, 1042, 51);
+donut('chart-feb-mix', 3043, 1092, 559);
+donut('chart-mar-mix', 3102, 2136, 1890);
+donut('chart-apr-mix', 3010, 2465, 2444);
+donut('chart-may-mix', 2966, 2134, 2407);
+</script>
+</body>
+</html>
