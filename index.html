@@ -122,6 +122,48 @@
   .kpi-card.accent .kpi-value { color: var(--green); }
   .kpi-card.positive .kpi-value { color: var(--green); }
   .kpi-card.negative .kpi-value { color: var(--meta); }
+  /* MoM / QoQ DELTA BADGE */
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+  }
+  .kpi-delta .delta-ref { color: var(--muted); font-weight: 600; letter-spacing: 0.2px; }
+  .kpi-delta.up { color: var(--green); }
+  .kpi-delta.down { color: #FF4D4D; }
+  .kpi-delta.flat { color: var(--muted); font-weight: 700; }
+  .kpi-delta .arrow { font-size: 10px; }
+
+  /* QUARTERLY */
+  .quarter-block { margin-bottom: 48px; }
+  .quarter-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .quarter-head h2 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+  }
+  .quarter-head .q-range { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .q-partial-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #FFB800;
+    background: rgba(255,184,0,0.12);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
 
   /* BUDGET BAR */
   .budget-bar-wrap {
@@ -320,6 +362,7 @@
 <div class="tabs-wrap">
   <div class="tabs">
     <div class="tab active" onclick="switchTab('overview')">Overview</div>
+    <div class="tab" onclick="switchTab('quarterly')">Quarterly</div>
     <div class="tab" onclick="switchTab('jan')">January</div>
     <div class="tab" onclick="switchTab('feb')">February</div>
     <div class="tab" onclick="switchTab('mar')">March</div>
@@ -432,6 +475,119 @@
 
 </div>
 
+<!-- =============================== QUARTERLY =============================== -->
+<div id="tab-quarterly" class="month-view">
+  <div class="section-label">Quarterly Overview · 2026</div>
+
+  <div class="callout">
+    <strong>Q1 (Jan–Mar)</strong> is a complete quarter. <strong>Q2 (Apr–May)</strong> covers only 2 of 3 months, so its raw totals are not directly comparable to Q1. The quarter-over-quarter deltas below are calculated on a <strong>monthly-average basis</strong> (labelled <em>vs Q1 /mo</em>) to keep the comparison fair.
+  </div>
+
+  <!-- Q1 -->
+  <div class="quarter-block">
+    <div class="quarter-head">
+      <h2>Q1</h2>
+      <span class="q-range">January – March 2026 · complete</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card accent">
+        <div class="kpi-label">Total Spend</div>
+        <div class="kpi-value">€15,900</div>
+        <div class="kpi-sub">vs €21,000 budget · 76%</div>
+        <div class="kpi-delta flat">Baseline quarter</div>
+      </div>
+      <div class="kpi-card negative">
+        <div class="kpi-label">Variance</div>
+        <div class="kpi-value">-€5,100</div>
+        <div class="kpi-sub">Accumulated underspend</div>
+        <div class="kpi-delta flat">Baseline quarter</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Google Ads</div>
+        <div class="kpi-value">€9,129</div>
+        <div class="kpi-sub">57% of spend</div>
+        <div class="kpi-delta flat">Baseline quarter</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">LinkedIn</div>
+        <div class="kpi-value">€4,270</div>
+        <div class="kpi-sub">27% of spend</div>
+        <div class="kpi-delta flat">Baseline quarter</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Meta</div>
+        <div class="kpi-value">€2,500</div>
+        <div class="kpi-sub">16% of spend</div>
+        <div class="kpi-delta flat">Baseline quarter</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Sessions</div>
+        <div class="kpi-value">30,136</div>
+        <div class="kpi-sub">3-month total</div>
+        <div class="kpi-delta flat">Baseline quarter</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="quarter-block">
+    <div class="quarter-head">
+      <h2>Q2</h2>
+      <span class="q-range">April – May 2026</span>
+      <span class="q-partial-tag">Partial · 2 of 3 months</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card accent">
+        <div class="kpi-label">Total Spend</div>
+        <div class="kpi-value">€15,426</div>
+        <div class="kpi-sub">2 mo · vs €14,000 budget · 110%</div>
+        <div class="kpi-delta up"><span class="arrow">▲</span> +46% <span class="delta-ref">vs Q1 /mo</span></div>
+      </div>
+      <div class="kpi-card positive">
+        <div class="kpi-label">Variance</div>
+        <div class="kpi-value">+€1,426</div>
+        <div class="kpi-sub">On 2-month budget</div>
+        <div class="kpi-delta up"><span class="arrow">▲</span> swing to surplus <span class="delta-ref">vs Q1</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Google Ads</div>
+        <div class="kpi-value">€5,976</div>
+        <div class="kpi-sub">39% of spend</div>
+        <div class="kpi-delta down"><span class="arrow">▼</span> -2% <span class="delta-ref">vs Q1 /mo</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">LinkedIn</div>
+        <div class="kpi-value">€4,599</div>
+        <div class="kpi-sub">30% of spend</div>
+        <div class="kpi-delta up"><span class="arrow">▲</span> +62% <span class="delta-ref">vs Q1 /mo</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Meta</div>
+        <div class="kpi-value">€4,851</div>
+        <div class="kpi-sub">31% of spend</div>
+        <div class="kpi-delta up"><span class="arrow">▲</span> +191% <span class="delta-ref">vs Q1 /mo</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Sessions</div>
+        <div class="kpi-value">24,743</div>
+        <div class="kpi-sub">2-month total</div>
+        <div class="kpi-delta up"><span class="arrow">▲</span> +23% <span class="delta-ref">vs Q1 /mo</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARISON -->
+  <div class="section-label">Avg Monthly Spend by Channel · Q1 vs Q2</div>
+  <div class="grid-wrap mb">
+    <div class="grid-2">
+      <div class="card" style="grid-column:span 2;">
+        <h3>Average Monthly Spend per Channel (€) <span class="channel-pill pill-web">Like-for-like</span></h3>
+        <div class="chart-wrap tall"><canvas id="chart-q-channel"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- =============================== JANUARY =============================== -->
 <div id="tab-jan" class="month-view">
   <div class="section-label">January 2026</div>
@@ -441,31 +597,37 @@
       <div class="kpi-label">Total Spend</div>
       <div class="kpi-value">€4,078</div>
       <div class="kpi-sub">vs €7,000 budget</div>
+      <div class="kpi-delta flat">Baseline month</div>
     </div>
     <div class="kpi-card negative">
       <div class="kpi-label">Variance</div>
       <div class="kpi-value">-€2,922</div>
       <div class="kpi-sub">58% utilisation</div>
+      <div class="kpi-delta flat">Baseline month</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Google Ads</div>
       <div class="kpi-value">€2,984</div>
       <div class="kpi-sub">73% of spend</div>
+      <div class="kpi-delta flat">Baseline month</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">LinkedIn</div>
       <div class="kpi-value">€1,042</div>
       <div class="kpi-sub">26% of spend</div>
+      <div class="kpi-delta flat">Baseline month</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Meta</div>
       <div class="kpi-value">€51</div>
       <div class="kpi-sub">1% of spend</div>
+      <div class="kpi-delta flat">Baseline month</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Sessions</div>
       <div class="kpi-value">8,720</div>
       <div class="kpi-sub">1,559 paid search</div>
+      <div class="kpi-delta flat">Baseline month</div>
     </div>
   </div>
 
@@ -561,31 +723,37 @@
       <div class="kpi-label">Total Spend</div>
       <div class="kpi-value">€4,694</div>
       <div class="kpi-sub">vs €7,000 budget</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +15% <span class="delta-ref">vs Jan</span></div>
     </div>
     <div class="kpi-card negative">
       <div class="kpi-label">Variance</div>
       <div class="kpi-value">-€2,306</div>
       <div class="kpi-sub">67% utilisation</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> €616 <span class="delta-ref">vs Jan</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Google Ads</div>
       <div class="kpi-value">€3,043</div>
       <div class="kpi-sub">65% of spend</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +2% <span class="delta-ref">vs Jan</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">LinkedIn</div>
       <div class="kpi-value">€1,092</div>
       <div class="kpi-sub">23% of spend</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +5% <span class="delta-ref">vs Jan</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Meta</div>
       <div class="kpi-value">€559</div>
       <div class="kpi-sub">12% of spend</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +996% <span class="delta-ref">vs Jan</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Sessions</div>
       <div class="kpi-value">9,274</div>
-      <div class="kpi-sub">+6% vs Jan</div>
+      <div class="kpi-sub">2,081 paid search</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +6% <span class="delta-ref">vs Jan</span></div>
     </div>
   </div>
 
@@ -674,31 +842,37 @@
       <div class="kpi-label">Total Spend</div>
       <div class="kpi-value">€7,128</div>
       <div class="kpi-sub">vs €7,000 budget</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +52% <span class="delta-ref">vs Feb</span></div>
     </div>
     <div class="kpi-card positive">
       <div class="kpi-label">Variance</div>
       <div class="kpi-value">+€128</div>
       <div class="kpi-sub">First on-budget month</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> €2,434 <span class="delta-ref">vs Feb</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Google Ads</div>
       <div class="kpi-value">€3,102</div>
       <div class="kpi-sub">43% of spend</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +2% <span class="delta-ref">vs Feb</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">LinkedIn</div>
       <div class="kpi-value">€2,136</div>
       <div class="kpi-sub">30% of spend</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +96% <span class="delta-ref">vs Feb</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Meta</div>
       <div class="kpi-value">€1,890</div>
       <div class="kpi-sub">27% of spend</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +238% <span class="delta-ref">vs Feb</span></div>
     </div>
     <div class="kpi-card positive">
       <div class="kpi-label">Sessions</div>
       <div class="kpi-value">12,142</div>
-      <div class="kpi-sub">+31% vs Feb</div>
+      <div class="kpi-sub">2,980 paid search</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +31% <span class="delta-ref">vs Feb</span></div>
     </div>
   </div>
 
@@ -787,31 +961,37 @@
       <div class="kpi-label">Total Spend</div>
       <div class="kpi-value">€7,919</div>
       <div class="kpi-sub">vs €7,000 budget</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +11% <span class="delta-ref">vs Mar</span></div>
     </div>
     <div class="kpi-card positive">
       <div class="kpi-label">Variance</div>
       <div class="kpi-value">+€919</div>
       <div class="kpi-sub">Highest spend month</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> €791 <span class="delta-ref">vs Mar</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Google Ads</div>
       <div class="kpi-value">€3,010</div>
       <div class="kpi-sub">38% of spend</div>
+      <div class="kpi-delta down"><span class="arrow">▼</span> -3% <span class="delta-ref">vs Mar</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">LinkedIn</div>
       <div class="kpi-value">€2,465</div>
       <div class="kpi-sub">31% of spend</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +15% <span class="delta-ref">vs Mar</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Meta</div>
       <div class="kpi-value">€2,444</div>
       <div class="kpi-sub">31% of spend</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +29% <span class="delta-ref">vs Mar</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Sessions</div>
       <div class="kpi-value">12,121</div>
       <div class="kpi-sub">2,396 paid search</div>
+      <div class="kpi-delta down"><span class="arrow">▼</span> -0.2% <span class="delta-ref">vs Mar</span></div>
     </div>
   </div>
 
@@ -900,31 +1080,37 @@
       <div class="kpi-label">Total Spend</div>
       <div class="kpi-value">€7,507</div>
       <div class="kpi-sub">vs €7,000 budget</div>
+      <div class="kpi-delta down"><span class="arrow">▼</span> -5% <span class="delta-ref">vs Apr</span></div>
     </div>
     <div class="kpi-card positive">
       <div class="kpi-label">Variance</div>
       <div class="kpi-value">+€507</div>
       <div class="kpi-sub">107% utilisation</div>
+      <div class="kpi-delta down"><span class="arrow">▼</span> €412 <span class="delta-ref">vs Apr</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Google Ads</div>
       <div class="kpi-value">€2,966</div>
       <div class="kpi-sub">40% of spend</div>
+      <div class="kpi-delta down"><span class="arrow">▼</span> -1% <span class="delta-ref">vs Apr</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">LinkedIn</div>
       <div class="kpi-value">€2,134</div>
       <div class="kpi-sub">28% of spend</div>
+      <div class="kpi-delta down"><span class="arrow">▼</span> -13% <span class="delta-ref">vs Apr</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Meta</div>
       <div class="kpi-value">€2,407</div>
       <div class="kpi-sub">32% of spend</div>
+      <div class="kpi-delta down"><span class="arrow">▼</span> -2% <span class="delta-ref">vs Apr</span></div>
     </div>
     <div class="kpi-card positive">
       <div class="kpi-label">Sessions</div>
       <div class="kpi-value">12,622</div>
-      <div class="kpi-sub">+4% vs Apr</div>
+      <div class="kpi-sub">3,095 paid search</div>
+      <div class="kpi-delta up"><span class="arrow">▲</span> +4% <span class="delta-ref">vs Apr</span></div>
     </div>
   </div>
 
@@ -1021,13 +1207,17 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May'];
 const C = { green:'#2CF4A0', purple:'#7B5CFF', amber:'#FF9D3A', white:'#FFFFFF' };
 const G = { grid:'rgba(34,34,34,0.8)', tick:'#555555' };
 
-// Tab switching
+// Tab switching (position-independent: matches the tab by its onclick target)
 function switchTab(id) {
   document.querySelectorAll('.month-view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
-  const map = {overview:0,jan:1,feb:2,mar:3,apr:4,may:5};
-  document.querySelectorAll('.tab')[map[id]].classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => {
+    const oc = t.getAttribute('onclick') || '';
+    if (oc.indexOf("'" + id + "'") !== -1) t.classList.add('active');
+  });
+  // Initialise any charts inside the newly-visible tab
+  document.querySelectorAll('#tab-' + id + ' canvas').forEach(c => initChart(c.id));
 }
 
 Chart.defaults.color = G.tick;
@@ -1257,6 +1447,22 @@ function donut(id, g, li, m) {
     }
   }));
 }
+// ── QUARTERLY COMPARISON CHART (avg monthly spend per channel) ────────────────
+registerChart('chart-q-channel', (el) => new Chart(el, {
+  type: 'bar',
+  data: {
+    labels: ['Google Ads','LinkedIn','Meta'],
+    datasets: [
+      { label: 'Q1 avg/mo (Jan–Mar)', data: [3043,1423,833], backgroundColor: 'rgba(123,92,255,0.85)', borderRadius: 4 },
+      { label: 'Q2 avg/mo (Apr–May)', data: [2988,2300,2426], backgroundColor: C.green, borderRadius: 4 }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, ...barAnim,
+    plugins: { legend: { labels: { ...squareLegend } } },
+    scales: scaleBase
+  }
+}));
+
 donut('chart-jan-mix', 2984, 1042, 51);
 donut('chart-feb-mix', 3043, 1092, 559);
 donut('chart-mar-mix', 3102, 2136, 1890);
